@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Administrador de Enlaces de Películas</title>
+<meta name="description" content="Panel administrativo para organizar películas, servidores y enlaces." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Loader inicial -->
+<div id="initialLoader" class="loader">
+  <div class="loader__mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2"/>
+      <path d="M3 9h18M8 5v4M16 5v4"/>
+    </svg>
+  </div>
+  <p class="loader__text">Cargando administrador…</p>
+</div>
+
+<div class="app-shell">
+
+  <!-- Encabezado -->
+  <header class="app-header">
+    <div class="app-header__top">
+      <div class="brand">
+        <span class="brand__mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2"/>
+            <path d="M3 9h18M8 5v4M16 5v4"/>
+          </svg>
+        </span>
+        <div>
+          <h1 class="brand__title">Administrador de Enlaces de Películas</h1>
+          <p class="brand__subtitle">Organiza servidores y enlaces desde un solo panel</p>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-pill">
+          <span class="stat-pill__value" id="movieCount">0</span>
+          <span class="stat-pill__label">Películas</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-pill__value" id="serverCount">0</span>
+          <span class="stat-pill__label">Servidores</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-header__toolbar">
+      <div class="search-box">
+        <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="searchInput" placeholder="Buscar película por nombre…" autocomplete="off" />
+      </div>
+
+      <select id="sortSelect" class="sort-select" aria-label="Ordenar">
+        <option value="date-newest">Más recientes primero</option>
+        <option value="date-oldest">Más antiguas primero</option>
+        <option value="modified">Última modificación</option>
+        <option value="name-asc">Nombre (A–Z)</option>
+        <option value="name-desc">Nombre (Z–A)</option>
+      </select>
+
+      <div class="toolbar-actions">
+        <button type="button" class="btn btn--ghost" id="exportBtn" title="Exportar base de datos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+          Exportar
+        </button>
+        <button type="button" class="btn btn--ghost" id="importBtn" title="Importar base de datos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
+          Importar
+        </button>
+        <input type="file" id="importInput" accept="application/json" hidden />
+        <button type="button" class="btn btn--primary" id="addMovieBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar Película
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="app-main">
+    <div class="panel">
+
+      <div class="table-wrapper" id="tableWrapper">
+        <table class="movies-table">
+          <thead>
+            <tr>
+              <th>Película</th>
+              <th>Servidores</th>
+              <th>Fecha de creación</th>
+              <th>Última modificación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="emptyState" hidden>
+        <div class="empty-state__mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5v4M16 5v4"/></svg>
+        </div>
+        <h2>Aún no hay películas registradas</h2>
+        <p>Agrega tu primera película para empezar a organizar sus servidores y enlaces.</p>
+        <button type="button" class="btn btn--primary" id="emptyStateAddBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar Película
+        </button>
+      </div>
+
+      <div class="pagination" id="pagination" hidden></div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p>Los datos se guardan localmente en este navegador. Usa "Exportar" para crear una copia de respaldo.</p>
+  </footer>
+</div>
+
+<!-- Modal genérico -->
+<div class="modal-overlay" id="modalOverlay"></div>
+
+<!-- Contenedor de notificaciones Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!--
+  Scripts cargados como <script> planos (sin type="module") para que la app
+  funcione al abrir index.html directamente con doble clic (protocolo file://).
+  Los navegadores bloquean los módulos ES bajo file://, así que cada archivo
+  expone sus funciones/clases en el ámbito global y el orden de carga importa:
+  utils -> storage -> crud -> modal -> ui -> app.
+-->
+<script src="js/utils.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/crud.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const emptyBtn = document.getElementById('emptyStateAddBtn');
+    if (emptyBtn) emptyBtn.addEventListener('click', () => document.getElementById('addMovieBtn').click());
+  });
+</script>
+</body>
+</html>
