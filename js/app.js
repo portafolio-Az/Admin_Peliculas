@@ -16,10 +16,16 @@ class App {
 
   async init() {
     Toast.init();
-    await movieRepository.init();
-    this.bindEvents();
-    this.render();
-    this.ui.hideLoader();
+    try {
+      await movieRepository.init();
+      this.bindEvents();
+      this.render();
+    } catch (err) {
+      console.error('Error al inicializar la aplicación:', err);
+      Toast.error('Ocurrió un problema al cargar los datos. Revisa la consola para más detalles.');
+    } finally {
+      this.ui.hideLoader();
+    }
   }
 
   bindEvents() {

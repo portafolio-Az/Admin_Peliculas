@@ -406,6 +406,63 @@ button, input, select { font-family: inherit; }
   font-size: 0.8rem;
 }
 
+/* Insignias de servidores (tabla y modales) */
+.server-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.server-icon-badge svg { width: 18px; height: 18px; }
+
+.select-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.select-with-badge select { flex: 1; }
+
+.server-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.server-icons--empty {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.server-icons__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: transform 0.15s var(--ease);
+}
+
+.server-icons__badge svg { width: 16px; height: 16px; }
+
+.server-icons__badge:hover { transform: translateY(-2px); }
+
+.server-icons__badge--extra {
+  background: var(--color-surface-3);
+  color: var(--color-text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
 .cell-actions {
   display: flex;
   gap: 8px;
@@ -740,6 +797,10 @@ button, input, select { font-family: inherit; }
    Responsive
    ========================================================================== */
 
+@media (max-width: 900px) {
+  .movies-table { min-width: 640px; }
+}
+
 @media (max-width: 720px) {
   .app-shell { padding: 20px 16px 48px; }
 
@@ -747,7 +808,7 @@ button, input, select { font-family: inherit; }
 
   .toolbar-actions { width: 100%; }
   .toolbar-actions .btn { flex: 1; justify-content: center; }
-  .toolbar-actions .btn span { display: none; }
+  .toolbar-actions .btn--ghost .btn__label { display: none; }
 
   .app-header__toolbar { flex-direction: column; align-items: stretch; }
 
@@ -763,6 +824,58 @@ button, input, select { font-family: inherit; }
   .brand__title { font-size: 1.15rem; }
   .header-stats { width: 100%; }
   .stat-pill { flex: 1; }
+}
+
+/* Tabla -> tarjetas apiladas en pantallas angostas, para evitar scroll horizontal */
+@media (max-width: 640px) {
+  .table-wrapper { overflow-x: visible; }
+
+  .movies-table { min-width: 0; }
+
+  .movies-table thead { display: none; }
+
+  .movies-table, .movies-table tbody, .movies-table tr, .movies-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .movies-table tbody tr {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin: 12px;
+    padding: 4px 0;
+    background: var(--color-surface-2);
+  }
+
+  .movies-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border-soft);
+    text-align: right;
+  }
+
+  .movies-table tr td:last-child { border-bottom: none; }
+
+  .movies-table td::before {
+    content: attr(data-label);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .cell-movie { text-align: left; }
+  .cell-movie::before { display: none; }
+  .cell-movie .movie-name { font-size: 0.95rem; }
+
+  .server-icons { justify-content: flex-end; }
+
+  .cell-actions { justify-content: flex-end; flex-wrap: wrap; }
 }
 
 /* Respeta preferencia de movimiento reducido */

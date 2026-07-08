@@ -4,6 +4,86 @@
  * No contiene lógica de negocio ni acceso a almacenamiento.
  */
 
+/**
+ * Catálogo de servidores conocidos con su color de marca e icono propio
+ * (insignias originales inspiradas en cada marca, no logotipos exactos).
+ * Se puede ampliar con más servidores en el futuro sin tocar el resto del código.
+ */
+const SERVER_CATALOG = [
+  {
+    id: 'mega',
+    label: 'Mega',
+    match: ['mega'],
+    color: '#E63946',
+    icon: '<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="6" fill="currentColor" opacity="0.55"/><circle cx="16" cy="12" r="6" fill="currentColor"/></svg>',
+  },
+  {
+    id: 'mediafire',
+    label: 'Mediafire',
+    match: ['mediafire', 'media fire'],
+    color: '#1299D8',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 8v8l8 5 8-5V8l-8-5Z"/><path d="M4 8l8 5 8-5M12 13v8"/></svg>',
+  },
+  {
+    id: 'drive',
+    label: 'Google Drive',
+    match: ['drive', 'google drive', 'googledrive'],
+    color: '#34A853',
+    icon: '<svg viewBox="0 0 24 24"><polygon points="9,3 15,3 22,15 16,15" fill="#FBBC05"/><polygon points="9,3 2,15 5,21 12,9" fill="#4285F4"/><polygon points="5,21 19,21 22,15 8,15" fill="#34A853"/></svg>',
+  },
+  {
+    id: 'dropbox',
+    label: 'Dropbox',
+    match: ['dropbox', 'drop box'],
+    color: '#0061FF',
+    icon: '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 12,7 6,11 0,7"/><polygon points="18,3 24,7 18,11 12,7"/><polygon points="6,13 12,17 6,21 0,17"/><polygon points="18,13 24,17 18,21 12,17"/></svg>',
+  },
+  {
+    id: 'onedrive',
+    label: 'OneDrive',
+    match: ['onedrive', 'one drive'],
+    color: '#0078D4',
+    icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 17c-2.5 0-4.5-2-4.5-4.5 0-2.2 1.6-4.1 3.7-4.4C8.2 5.9 10.4 4 13 4c2.9 0 5.3 2.1 5.7 4.9 2.2.4 3.8 2.3 3.8 4.6 0 2.5-2 4.5-4.5 4.5H8.5Z"/></svg>',
+  },
+  {
+    id: '4shared',
+    label: '4shared',
+    match: ['4shared', '4 shared'],
+    color: '#1CADE4',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v11H4l10 7V10h10L14 3Z"/></svg>',
+  },
+  {
+    id: 'directo',
+    label: 'Descarga Directa',
+    match: ['descarga directa', 'directo', 'download'],
+    color: '#5B8DEF',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+  },
+  {
+    id: 'otro',
+    label: 'Otro',
+    match: [],
+    color: '#7C8798',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.36-1.36"/></svg>',
+  },
+];
+
+/**
+ * Busca en el catálogo el servidor que coincide con el nombre escrito por el usuario.
+ * Si no encuentra coincidencia, devuelve una insignia genérica con la inicial del nombre.
+ */
+function getServerIcon(name) {
+  const normalized = (name || '').trim().toLowerCase();
+  const found = SERVER_CATALOG.find((entry) => entry.match.some((alias) => normalized === alias || normalized.includes(alias)));
+  if (found) return found;
+  return {
+    id: 'custom',
+    label: name || 'Otro',
+    color: '#7C8798',
+    icon: `<svg viewBox="0 0 24 24"><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" font-family="Poppins, Inter, sans-serif">${escapeHtml((name || '?').trim().charAt(0).toUpperCase())}</text></svg>`,
+  };
+}
+
 /** Genera un identificador único razonablemente corto. */
 function generateId(prefix = 'id') {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;

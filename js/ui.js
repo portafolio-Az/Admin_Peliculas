@@ -4,7 +4,7 @@
  * y estados vacíos. No contiene lógica de persistencia.
  */
 
-/* Depende de utils.js (escapeHtml, formatDate) y modal.js (ICONS),
+/* Depende de utils.js (escapeHtml, formatDate, getServerIcon) y modal.js (ICONS),
    que deben cargarse antes que este archivo en index.html. */
 
 const PAGE_SIZE = 8;
@@ -68,15 +68,15 @@ class UIController {
     this.tableBody.innerHTML = pageItems
       .map((movie) => `
         <tr data-id="${movie.id}">
-          <td class="cell-movie">
+          <td class="cell-movie" data-label="Película">
             <span class="movie-name">${escapeHtml(movie.name)}</span>
           </td>
-          <td>
-            <span class="badge">${movie.servers.length}</span>
+          <td data-label="Servidores">
+            ${this.renderServerIcons(movie.servers)}
           </td>
-          <td class="cell-date">${formatDate(movie.createdAt)}</td>
-          <td class="cell-date">${formatDate(movie.updatedAt)}</td>
-          <td class="cell-actions">
+          <td class="cell-date" data-label="Creación">${formatDate(movie.createdAt)}</td>
+          <td class="cell-date" data-label="Modificación">${formatDate(movie.updatedAt)}</td>
+          <td class="cell-actions" data-label="Acciones">
             <button class="icon-btn" data-action="view" title="Ver enlaces" aria-label="Ver enlaces">${ICONS.eye}</button>
             <button class="icon-btn" data-action="edit" title="Editar" aria-label="Editar">${ICONS.edit}</button>
             <button class="icon-btn" data-action="duplicate" title="Duplicar" aria-label="Duplicar">${ICONS.duplicate}</button>
@@ -87,6 +87,29 @@ class UIController {
       .join('');
 
     this.renderPagination(totalPages);
+  }
+
+  /** Genera las insignias de iconos de servidores usados por una película. */
+  renderServerIcons(servers) {
+    if (!servers || servers.length === 0) {
+      return `<span class="server-icons server-icons--empty">Sin servidores</span>`;
+    }
+    const MAX_VISIBLE = 5;
+    const visible = servers.slice(0, MAX_VISIBLE);
+    const extra = servers.length - visible.length;
+
+    const badges = visible
+      .map((server) => {
+        const { label, color, icon } = getServerIcon(server.name);
+        return `<span class="server-icons__badge" style="color:${color}; background:${color}22;" title="${escapeHtml(label)}">${icon}</span>`;
+      })
+      .join('');
+
+    const extraBadge = extra > 0
+      ? `<span class="server-icons__badge server-icons__badge--extra" title="${extra} servidor(es) más">+${extra}</span>`
+      : '';
+
+    return `<div class="server-icons">${badges}${extraBadge}</div>`;
   }
 
   renderPagination(totalPages) {
@@ -117,6 +140,7 @@ class UIController {
   }
 
   hideLoader() {
+    if (window.__loaderSafety) clearTimeout(window.__loaderSafety);
     const loader = document.getElementById('initialLoader');
     if (!loader) return;
     loader.classList.add('is-hidden');

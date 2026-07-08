@@ -4,10 +4,10 @@
  * formulario de película, visor de enlaces y confirmación de borrado.
  */
 
-/* Depende de utils.js (escapeHtml, copyToClipboard, openInNewTab, Toast, generateId),
-   que debe cargarse antes que este archivo en index.html. */
+/* Depende de utils.js (escapeHtml, copyToClipboard, openInNewTab, Toast, generateId,
+   SERVER_CATALOG, getServerIcon), que debe cargarse antes que este archivo en index.html. */
 
-const SERVER_PRESETS = ['Mega', 'Mediafire', 'Google Drive', 'Dropbox', 'Pixeldrain', 'Otro'];
+const SERVER_PRESETS = SERVER_CATALOG.map((entry) => entry.label);
 
 class ModalController {
   constructor() {
@@ -107,7 +107,9 @@ class ModalController {
     serversList.addEventListener('input', (e) => {
       const target = e.target;
       if (target.matches('[data-server-name]')) {
-        servers[Number(target.dataset.serverName)].name = target.value;
+        const idx = Number(target.dataset.serverName);
+        servers[idx].name = target.value;
+        this._updateServerIconPreview(idx);
       } else if (target.matches('[data-link-original]')) {
         const [sIdx, lIdx] = target.dataset.linkOriginal.split('-').map(Number);
         servers[sIdx].links[lIdx].original = target.value;
@@ -137,6 +139,17 @@ class ModalController {
     return { id: generateId('server'), name: '', links: [{ original: '', short: '' }] };
   }
 
+  /** Actualiza en vivo la insignia de icono junto al nombre del servidor. */
+  _updateServerIconPreview(sIdx) {
+    const badge = this.overlay.querySelector(`[data-server-icon="${sIdx}"]`);
+    const nameInput = this.overlay.querySelector(`[data-server-name="${sIdx}"]`);
+    if (!badge || !nameInput) return;
+    const { color, icon } = getServerIcon(nameInput.value);
+    badge.style.color = color;
+    badge.style.background = `${color}22`;
+    badge.innerHTML = icon;
+  }
+
   _serverBlockHtml(server, sIdx) {
     const presetOptions = SERVER_PRESETS.map(
       (preset) => `<option value="${preset}" ${server.name === preset ? 'selected' : ''}></option>`
@@ -158,9 +171,12 @@ class ModalController {
       `)
       .join('');
 
+    const preview = getServerIcon(server.name);
+
     return `
       <div class="server-block">
         <div class="server-block__header">
+          <span class="server-icon-badge" data-server-icon="${sIdx}" style="color:${preview.color}; background:${preview.color}22;">${preview.icon}</span>
           <input type="text" list="serverPresets-${sIdx}" placeholder="Nombre del servidor (Mega, Mediafire...)" data-server-name="${sIdx}" value="${escapeHtml(server.name)}" />
           <datalist id="serverPresets-${sIdx}">${presetOptions}</datalist>
           <button type="button" class="icon-btn icon-btn--danger" data-remove-server="${sIdx}" aria-label="Quitar servidor" title="Quitar servidor">${ICONS.trash}</button>
@@ -190,7 +206,10 @@ class ModalController {
             : `
               <div class="field">
                 <label for="serverSelect">Servidor</label>
-                <select id="serverSelect">${options}</select>
+                <div class="select-with-badge">
+                  <span class="server-icon-badge" id="serverSelectBadge"></span>
+                  <select id="serverSelect">${options}</select>
+                </div>
               </div>
               <div id="linksContainer" class="links-view"></div>
             `}
@@ -206,9 +225,19 @@ class ModalController {
     if (servers.length === 0) return;
 
     const select = document.getElementById('serverSelect');
+    const badge = document.getElementById('serverSelectBadge');
     const container = document.getElementById('linksContainer');
 
+    const updateBadge = (serverId) => {
+      const server = servers.find((s) => s.id === serverId);
+      const { color, icon } = getServerIcon(server ? server.name : '');
+      badge.style.color = color;
+      badge.style.background = `${color}22`;
+      badge.innerHTML = icon;
+    };
+
     const renderLinks = (serverId) => {
+      updateBadge(serverId);
       const server = servers.find((s) => s.id === serverId);
       if (!server || server.links.length === 0) {
         container.innerHTML = `<div class="empty-state empty-state--modal"><p>Este servidor no tiene enlaces registrados.</p></div>`;

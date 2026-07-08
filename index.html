@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#0a0c10" />
 <title>Administrador de Enlaces de Películas</title>
 <meta name="description" content="Panel administrativo para organizar películas, servidores y enlaces." />
 
@@ -72,16 +74,16 @@
       <div class="toolbar-actions">
         <button type="button" class="btn btn--ghost" id="exportBtn" title="Exportar base de datos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-          Exportar
+          <span class="btn__label">Exportar</span>
         </button>
         <button type="button" class="btn btn--ghost" id="importBtn" title="Importar base de datos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
-          Importar
+          <span class="btn__label">Importar</span>
         </button>
         <input type="file" id="importInput" accept="application/json" hidden />
         <button type="button" class="btn btn--primary" id="addMovieBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          Agregar Película
+          <span class="btn__label">Agregar Película</span>
         </button>
       </div>
     </div>
@@ -140,6 +142,21 @@
   expone sus funciones/clases en el ámbito global y el orden de carga importa:
   utils -> storage -> crud -> modal -> ui -> app.
 -->
+<script>
+  // Salvaguarda: si algo falla al cargar los scripts, evita que el loader quede
+  // colgado indefinidamente y avisa en consola para poder diagnosticarlo.
+  window.addEventListener('error', (e) => {
+    console.error('Error en la aplicación:', e.message, e.filename, e.lineno);
+  });
+  window.__loaderSafety = setTimeout(() => {
+    const loader = document.getElementById('initialLoader');
+    if (loader && !loader.classList.contains('is-hidden')) {
+      loader.classList.add('is-hidden');
+      setTimeout(() => loader.remove(), 400);
+      console.warn('El loader se ocultó por tiempo de espera; revisa la consola por posibles errores de carga.');
+    }
+  }, 4000);
+</script>
 <script src="js/utils.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/crud.js"></script>
