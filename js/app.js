@@ -17,8 +17,9 @@ class App {
   async init() {
     Toast.init();
     try {
-      await movieRepository.init();
+      await movieRepository.init(() => this.render());
       this.bindEvents();
+      this.updateSyncStatus();
       this.render();
     } catch (err) {
       console.error('Error al inicializar la aplicación:', err);
@@ -26,6 +27,16 @@ class App {
     } finally {
       this.ui.hideLoader();
     }
+  }
+
+  /** Muestra si la app está sincronizando con Firebase o guardando solo localmente. */
+  updateSyncStatus() {
+    const el = document.getElementById('syncStatus');
+    if (!el) return;
+    const isFirebase = storageService.mode === 'firebase';
+    el.textContent = isFirebase ? 'Sincronizado en la nube' : 'Almacenamiento local';
+    el.classList.toggle('sync-status--cloud', isFirebase);
+    el.classList.toggle('sync-status--local', !isFirebase);
   }
 
   bindEvents() {
@@ -91,7 +102,7 @@ class App {
         });
         if (!confirmed) return;
         const movies = await storageService.importData(payload);
-        await movieRepository.replaceAll(movies);
+        movieRepository.setLocal(movies);
         Toast.success('Base de datos importada correctamente.');
         this.render();
       } catch (err) {

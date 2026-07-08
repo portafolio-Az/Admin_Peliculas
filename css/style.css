@@ -169,7 +169,40 @@ button, input, select { font-family: inherit; }
 
 .header-stats {
   display: flex;
+  align-items: center;
   gap: 12px;
+}
+
+.sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.sync-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.sync-status--cloud {
+  color: var(--color-success);
+  border-color: rgba(53, 199, 138, 0.35);
+  background: rgba(53, 199, 138, 0.1);
+}
+
+.sync-status--local {
+  color: var(--color-text-secondary);
 }
 
 .stat-pill {
@@ -804,15 +837,34 @@ button, input, select { font-family: inherit; }
 @media (max-width: 720px) {
   .app-shell { padding: 20px 16px 48px; }
 
-  .app-header__top { flex-direction: column; align-items: flex-start; }
+  .app-header { gap: 16px; margin-bottom: 20px; }
 
-  .toolbar-actions { width: 100%; }
-  .toolbar-actions .btn { flex: 1; justify-content: center; }
+  .app-header__top { flex-direction: column; align-items: flex-start; gap: 16px; }
+
+  .app-header__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  /* Corrige el bug de flex-basis: en flex-direction column, "flex: 1 1 260px"
+     se interpreta como altura (260px) en vez de ancho, inflando la caja de
+     búsqueda y descentrando el icono de lupa. Se resetea explícitamente. */
+  .search-box {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-box input { padding: 10px 14px 10px 40px; font-size: 0.85rem; }
+
+  .sort-select { width: 100%; padding: 10px 12px; }
+
+  .toolbar-actions { width: 100%; gap: 8px; }
+  .toolbar-actions .btn { flex: 1; justify-content: center; padding: 10px 12px; }
   .toolbar-actions .btn--ghost .btn__label { display: none; }
-
-  .app-header__toolbar { flex-direction: column; align-items: stretch; }
-
-  .sort-select { width: 100%; }
+  .toolbar-actions .btn--ghost { flex: 0 0 44px; padding: 10px; justify-content: center; }
 
   .link-pair { grid-template-columns: 1fr; }
 
@@ -822,7 +874,8 @@ button, input, select { font-family: inherit; }
 
 @media (max-width: 480px) {
   .brand__title { font-size: 1.15rem; }
-  .header-stats { width: 100%; }
+  .header-stats { width: 100%; flex-wrap: wrap; }
+  .sync-status { width: 100%; justify-content: center; }
   .stat-pill { flex: 1; }
 }
 
@@ -858,6 +911,9 @@ button, input, select { font-family: inherit; }
   }
 
   .movies-table tr td:last-child { border-bottom: none; }
+
+  /* Las fechas no son prioritarias en móvil: se ocultan para ahorrar espacio */
+  .movies-table td.cell-date { display: none; }
 
   .movies-table td::before {
     content: attr(data-label);

@@ -46,6 +46,7 @@
       </div>
 
       <div class="header-stats">
+        <span class="sync-status" id="syncStatus">Cargando…</span>
         <div class="stat-pill">
           <span class="stat-pill__value" id="movieCount">0</span>
           <span class="stat-pill__label">Películas</span>
@@ -140,7 +141,7 @@
   funcione al abrir index.html directamente con doble clic (protocolo file://).
   Los navegadores bloquean los módulos ES bajo file://, así que cada archivo
   expone sus funciones/clases en el ámbito global y el orden de carga importa:
-  utils -> storage -> crud -> modal -> ui -> app.
+  utils -> (SDK de Firebase + firebase-config) -> storage -> crud -> modal -> ui -> app.
 -->
 <script>
   // Salvaguarda: si algo falla al cargar los scripts, evita que el loader quede
@@ -158,6 +159,17 @@
   }, 4000);
 </script>
 <script src="js/utils.js"></script>
+
+<!--
+  SDK de Firebase (versión "compat"): se usa esta variante -y no la modular
+  con import/export- para mantener la compatibilidad con file://. Si no
+  configuras Firebase (ver js/firebase-config.js), estos scripts se cargan
+  pero no se activan: la app sigue funcionando 100% en modo local.
+-->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+
 <script src="js/storage.js"></script>
 <script src="js/crud.js"></script>
 <script src="js/modal.js"></script>

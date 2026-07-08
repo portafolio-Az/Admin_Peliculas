@@ -15,14 +15,14 @@ const SERVER_CATALOG = [
     label: 'Mega',
     match: ['mega'],
     color: '#E63946',
-    icon: '<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="6" fill="currentColor" opacity="0.55"/><circle cx="16" cy="12" r="6" fill="currentColor"/></svg>',
+    icon: '<svg viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="800" fill="currentColor" font-family="Poppins, Inter, sans-serif">M</text></svg>',
   },
   {
     id: 'mediafire',
     label: 'Mediafire',
     match: ['mediafire', 'media fire'],
     color: '#1299D8',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 8v8l8 5 8-5V8l-8-5Z"/><path d="M4 8l8 5 8-5M12 13v8"/></svg>',
+    icon: '<svg viewBox="0 0 24 24"><text x="12" y="16" text-anchor="middle" font-size="8.5" font-weight="800" fill="currentColor" font-family="Poppins, Inter, sans-serif" letter-spacing="0.5">MF</text></svg>',
   },
   {
     id: 'drive',
@@ -50,7 +50,7 @@ const SERVER_CATALOG = [
     label: '4shared',
     match: ['4shared', '4 shared'],
     color: '#1CADE4',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v11H4l10 7V10h10L14 3Z"/></svg>',
+    icon: '<svg viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="800" fill="currentColor" font-family="Poppins, Inter, sans-serif">4</text></svg>',
   },
   {
     id: 'directo',
@@ -62,7 +62,7 @@ const SERVER_CATALOG = [
   {
     id: 'otro',
     label: 'Otro',
-    match: [],
+    match: ['otro'],
     color: '#7C8798',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.36-1.36"/></svg>',
   },

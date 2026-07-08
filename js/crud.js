@@ -1,7 +1,10 @@
 /**
  * crud.js
  * Lógica de negocio: crear, leer, actualizar, eliminar y duplicar películas.
- * Mantiene una copia en memoria sincronizada con storage.js.
+ * Mantiene una copia en memoria sincronizada con storage.js, tanto por
+ * escritura directa (optimista) como por el listener en tiempo real de
+ * storageService.subscribe (útil para el backend de Firestore, donde otro
+ * dispositivo puede modificar los datos en cualquier momento).
  */
 
 /* Depende de storage.js (storageService) y utils.js (generateId, nowISO),
@@ -10,10 +13,22 @@
 class MovieRepository {
   constructor() {
     this.movies = [];
+    this._unsubscribe = null;
   }
 
-  async init() {
+  /**
+   * Carga los datos iniciales y, si el backend lo soporta, se suscribe a
+   * cambios en tiempo real. `onRemoteChange` se invoca cada vez que los
+   * datos cambian por sincronización (por ejemplo, desde otro dispositivo).
+   */
+  async init(onRemoteChange) {
     this.movies = await storageService.getAll();
+    if (typeof storageService.subscribe === 'function') {
+      this._unsubscribe = storageService.subscribe((movies) => {
+        this.movies = movies;
+        if (typeof onRemoteChange === 'function') onRemoteChange();
+      });
+    }
     return this.movies;
   }
 
@@ -34,8 +49,8 @@ class MovieRepository {
       createdAt: nowISO(),
       updatedAt: nowISO(),
     };
+    await storageService.addMovie(movie);
     this.movies.unshift(movie);
-    await storageService.saveAll(this.movies);
     return movie;
   }
 
@@ -43,17 +58,22 @@ class MovieRepository {
   async update(id, data) {
     const movie = this.getById(id);
     if (!movie) throw new Error('Película no encontrada.');
-    movie.name = data.name.trim();
-    movie.servers = this._normalizeServers(data.servers);
-    movie.updatedAt = nowISO();
-    await storageService.saveAll(this.movies);
-    return movie;
+    const updated = {
+      ...movie,
+      name: data.name.trim(),
+      servers: this._normalizeServers(data.servers),
+      updatedAt: nowISO(),
+    };
+    await storageService.updateMovie(id, updated);
+    const idx = this.movies.findIndex((m) => m.id === id);
+    this.movies[idx] = updated;
+    return updated;
   }
 
   /** Elimina una película por id. */
   async remove(id) {
+    await storageService.deleteMovie(id);
     this.movies = this.movies.filter((movie) => movie.id !== id);
-    await storageService.saveAll(this.movies);
   }
 
   /** Duplica una película, incluyendo todos sus servidores y enlaces. */
@@ -68,14 +88,24 @@ class MovieRepository {
       updatedAt: nowISO(),
     };
     copy.servers = copy.servers.map((server) => ({ ...server, id: generateId('server') }));
+    await storageService.addMovie(copy);
     this.movies.unshift(copy);
-    await storageService.saveAll(this.movies);
     return copy;
   }
 
   async replaceAll(movies) {
+    await storageService.replaceAll(movies);
     this.movies = movies;
-    await storageService.saveAll(this.movies);
+  }
+
+  /** Actualiza solo la copia en memoria, sin volver a escribir en el backend
+      (útil después de storageService.importData, que ya persistió los datos). */
+  setLocal(movies) {
+    this.movies = movies;
+  }
+
+  destroy() {
+    if (this._unsubscribe) this._unsubscribe();
   }
 
   /** Normaliza la estructura de servidores/enlaces, asignando ids si faltan. */
