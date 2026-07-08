@@ -12,14 +12,14 @@
  */
 
 const FIREBASE_CONFIG = {
-  apiKey: 'TU_API_KEY',
-  authDomain: 'TU_PROYECTO.firebaseapp.com',
-  projectId: 'TU_PROYECTO',
-  storageBucket: 'TU_PROYECTO.appspot.com',
-  messagingSenderId: 'TU_SENDER_ID',
-  appId: 'TU_APP_ID',
+  apiKey: "AIzaSyDrSmWU_kG-6Ay6MCliacNbvyCPeLhUjLA",
+  authDomain: "admin-peliculas.firebaseapp.com",
+  projectId: "admin-peliculas",
+  storageBucket: "admin-peliculas.firebasestorage.app",
+  messagingSenderId: "381742107664",
+  appId: "1:381742107664:web:b2d6eec54c5ca9e2c7ce95",
 };
 
 /* Cambia esto a "true" una vez que hayas completado FIREBASE_CONFIG arriba
    y creado la base de datos Firestore en tu proyecto. */
-const FIREBASE_ENABLED = false;
+const FIREBASE_ENABLED = true;
