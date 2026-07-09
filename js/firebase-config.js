@@ -12,14 +12,15 @@
  */
 
 const FIREBASE_CONFIG = {
-  apiKey: 'TU_API_KEY',
-  authDomain: 'TU_PROYECTO.firebaseapp.com',
-  projectId: 'TU_PROYECTO',
-  storageBucket: 'TU_PROYECTO.appspot.com',
-  messagingSenderId: 'TU_SENDER_ID',
-  appId: 'TU_APP_ID',
+  apiKey: "AIzaSyCeVhlqOLp-yQ2fQndiijcW057zY1AAm9k",
+  authDomain: "sistema-cuentas-b0bbe.firebaseapp.com",
+  projectId: "sistema-cuentas-b0bbe",
+  storageBucket: "sistema-cuentas-b0bbe.firebasestorage.app",
+  messagingSenderId: "734076486112",
+  appId: "1:734076486112:web:3f1ea891e5906b730d6b85",
+  measurementId: "G-3CPE8PKLNT",
 };
 
 /* Cambia esto a "true" una vez que hayas completado FIREBASE_CONFIG arriba
    y creado la base de datos Firestore en tu proyecto. */
-const FIREBASE_ENABLED = false;
+const FIREBASE_ENABLED = true;
