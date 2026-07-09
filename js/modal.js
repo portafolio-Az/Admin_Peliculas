@@ -190,11 +190,11 @@ class ModalController {
         <div class="link-pair">
           <div class="field field--sm">
             <label>Original ${lIdx + 1}</label>
-            <input type="url" placeholder="https://..." data-link-original="${sIdx}-${lIdx}" value="${escapeHtml(link.original)}" />
+            <input type="text" placeholder="Pega el enlace o texto que quieras guardar" data-link-original="${sIdx}-${lIdx}" value="${escapeHtml(link.original)}" />
           </div>
           <div class="field field--sm">
             <label>Acortador ${lIdx + 1}</label>
-            <input type="url" placeholder="https://..." data-link-short="${sIdx}-${lIdx}" value="${escapeHtml(link.short)}" />
+            <input type="text" placeholder="Pega el enlace o texto que quieras guardar" data-link-short="${sIdx}-${lIdx}" value="${escapeHtml(link.short)}" />
           </div>
           <button type="button" class="icon-btn icon-btn--danger" data-remove-link="${sIdx}-${lIdx}" aria-label="Quitar enlace" title="Quitar enlace">${ICONS.trash}</button>
         </div>
