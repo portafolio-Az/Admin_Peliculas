@@ -106,16 +106,38 @@ class ModalController {
 
     serversList.addEventListener('input', (e) => {
       const target = e.target;
-      if (target.matches('[data-server-name]')) {
-        const idx = Number(target.dataset.serverName);
+      if (target.matches('[data-server-custom-name]')) {
+        const idx = Number(target.dataset.serverCustomName);
         servers[idx].name = target.value;
-        this._updateServerIconPreview(idx);
+        this._updateServerIconPreview(idx, target.value);
       } else if (target.matches('[data-link-original]')) {
         const [sIdx, lIdx] = target.dataset.linkOriginal.split('-').map(Number);
         servers[sIdx].links[lIdx].original = target.value;
       } else if (target.matches('[data-link-short]')) {
         const [sIdx, lIdx] = target.dataset.linkShort.split('-').map(Number);
         servers[sIdx].links[lIdx].short = target.value;
+      }
+    });
+
+    serversList.addEventListener('change', (e) => {
+      const target = e.target;
+      if (target.matches('[data-server-select]')) {
+        const idx = Number(target.dataset.serverSelect);
+        const wrapper = serversList.querySelector(`[data-server-custom-wrapper="${idx}"]`);
+        const customInput = serversList.querySelector(`[data-server-custom-name="${idx}"]`);
+
+        if (target.value === 'Otro') {
+          servers[idx]._pendingCustom = true;
+          servers[idx].name = customInput ? customInput.value : '';
+          if (wrapper) wrapper.hidden = false;
+          this._updateServerIconPreview(idx, servers[idx].name);
+          if (customInput) customInput.focus();
+        } else {
+          servers[idx]._pendingCustom = false;
+          servers[idx].name = target.value;
+          if (wrapper) wrapper.hidden = true;
+          this._updateServerIconPreview(idx, servers[idx].name);
+        }
       }
     });
 
@@ -140,20 +162,28 @@ class ModalController {
   }
 
   /** Actualiza en vivo la insignia de icono junto al nombre del servidor. */
-  _updateServerIconPreview(sIdx) {
+  _updateServerIconPreview(sIdx, name) {
     const badge = this.overlay.querySelector(`[data-server-icon="${sIdx}"]`);
-    const nameInput = this.overlay.querySelector(`[data-server-name="${sIdx}"]`);
-    if (!badge || !nameInput) return;
-    const { color, icon } = getServerIcon(nameInput.value);
+    if (!badge) return;
+    const { color, icon } = getServerIcon(name);
     badge.style.color = color;
     badge.style.background = `${color}22`;
     badge.innerHTML = icon;
   }
 
   _serverBlockHtml(server, sIdx) {
-    const presetOptions = SERVER_PRESETS.map(
-      (preset) => `<option value="${preset}" ${server.name === preset ? 'selected' : ''}></option>`
-    ).join('');
+    const matchedPreset = SERVER_PRESETS.includes(server.name)
+      ? server.name
+      : (server.name || server._pendingCustom ? 'Otro' : '');
+    const isCustom = matchedPreset === 'Otro';
+
+    const options = [`<option value="" disabled ${!server.name ? 'selected' : ''}>Selecciona un servidor…</option>`]
+      .concat(
+        SERVER_PRESETS.map(
+          (preset) => `<option value="${preset}" ${matchedPreset === preset ? 'selected' : ''}>${preset}</option>`
+        )
+      )
+      .join('');
 
     const linksHtml = server.links
       .map((link, lIdx) => `
@@ -177,9 +207,12 @@ class ModalController {
       <div class="server-block">
         <div class="server-block__header">
           <span class="server-icon-badge" data-server-icon="${sIdx}" style="color:${preview.color}; background:${preview.color}22;">${preview.icon}</span>
-          <input type="text" list="serverPresets-${sIdx}" placeholder="Nombre del servidor (Mega, Mediafire...)" data-server-name="${sIdx}" value="${escapeHtml(server.name)}" />
-          <datalist id="serverPresets-${sIdx}">${presetOptions}</datalist>
+          <select data-server-select="${sIdx}">${options}</select>
           <button type="button" class="icon-btn icon-btn--danger" data-remove-server="${sIdx}" aria-label="Quitar servidor" title="Quitar servidor">${ICONS.trash}</button>
+        </div>
+        <div class="field field--custom-server" data-server-custom-wrapper="${sIdx}" ${isCustom ? '' : 'hidden'}>
+          <label>Nombre del servidor</label>
+          <input type="text" placeholder="Escribe el nombre del servidor" data-server-custom-name="${sIdx}" value="${escapeHtml(isCustom ? server.name : '')}" />
         </div>
         <div class="links-list">${linksHtml}</div>
         <button type="button" class="btn btn--ghost btn--sm" data-add-link="${sIdx}">${ICONS.plus} Agregar enlace</button>

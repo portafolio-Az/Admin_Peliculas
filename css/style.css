@@ -624,6 +624,24 @@ button, input, select { font-family: inherit; }
 
 .modal--confirm { max-width: 420px; }
 .modal--view { max-width: 520px; }
+.modal--auth { max-width: 380px; }
+
+.auth-hint {
+  margin: -4px 0 4px;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.auth-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  border: 1px solid rgba(242, 84, 91, 0.35);
+  color: var(--color-danger);
+  font-size: 0.82rem;
+}
 
 .modal__header {
   display: flex;
@@ -717,7 +735,8 @@ button, input, select { font-family: inherit; }
   gap: 8px;
 }
 
-.server-block__header input {
+.server-block__header input,
+.server-block__header select {
   flex: 1;
   padding: 9px 12px;
   background: var(--color-surface-3);
@@ -728,7 +747,10 @@ button, input, select { font-family: inherit; }
   font-size: 0.85rem;
 }
 
-.server-block__header input:focus { outline: none; border-color: var(--color-blue); }
+.server-block__header select { cursor: pointer; }
+
+.server-block__header input:focus,
+.server-block__header select:focus { outline: none; border-color: var(--color-blue); }
 
 .links-list { display: flex; flex-direction: column; gap: 10px; }
 

@@ -15,7 +15,7 @@ Panel administrativo para organizar películas, sus servidores de descarga/strea
 - Notificaciones tipo toast, confirmaciones antes de eliminar, estados vacíos y loader inicial.
 - **Dos modos de almacenamiento intercambiables:**
   - **Local** (por defecto): guarda en `localStorage` del navegador, sin configuración.
-  - **Firebase Firestore** (opcional): sincroniza en tiempo real entre celular, laptop y cualquier otro dispositivo. Ver guía abajo.
+  - **Firebase Firestore** (opcional): sincroniza en tiempo real entre celular, laptop y cualquier otro dispositivo, protegido con inicio de sesión (correo/contraseña) para que solo tú puedas entrar. Ver guía abajo.
 
 ## Estructura del proyecto
 
@@ -28,6 +28,7 @@ Panel administrativo para organizar películas, sus servidores de descarga/strea
 │   ├── app.js              # Punto de entrada, conecta UI y lógica de negocio
 │   ├── firebase-config.js  # Tus credenciales de Firebase (opcional)
 │   ├── storage.js          # Capa de persistencia (localStorage o Firestore)
+│   ├── auth.js              # Login (correo/contraseña) cuando Firebase está activo
 │   ├── crud.js              # Lógica de negocio (crear/leer/actualizar/eliminar/duplicar)
 │   ├── ui.js                # Renderizado de tabla, contadores y paginación
 │   ├── modal.js              # Modales (formulario, visor de enlaces, confirmaciones)
@@ -114,33 +115,58 @@ Guarda el archivo. Al recargar `index.html` verás una insignia verde **"Sincron
 
 > **Nota sobre el `apiKey`:** en apps web de Firebase este valor no es secreto (queda visible en el código del navegador). La seguridad real la dan las **reglas de Firestore** (siguiente paso), no ocultar el `apiKey`.
 
-### 5. Asegurar las reglas de Firestore
+### 5. Activar el inicio de sesión (para que solo tú puedas entrar)
 
-El "modo de prueba" del paso 2 abre lectura/escritura a cualquiera por 30 días y luego se bloquea solo. Para uso personal (tú y quien más tenga el link), una opción simple es dejarlo así mientras pruebas, pero **antes de compartir el link públicamente**, ve a **Firestore Database → Reglas** y usa algo como esto para que no expire y sea razonablemente privado a quien conozca la URL del proyecto:
+Como vas a ser la única persona que use esta página, la configuramos para que pida correo y contraseña antes de mostrar nada.
+
+1. En Firebase Console, ve a **Compilación → Authentication**.
+2. Clic en **"Comenzar"**, luego en la pestaña **"Sign-in method"** habilita el proveedor **"Correo electrónico/contraseña"** (Email/Password) → Guardar.
+3. Ve a la pestaña **"Users"** (Usuarios) → **"Agregar usuario"** → escribe el correo y la contraseña que vas a usar tú para entrar. Con eso ya tienes tu única cuenta.
+
+No necesitas tocar nada más en el código: `index.html` ya carga el SDK de Firebase Auth y `js/auth.js` muestra automáticamente una pantalla de inicio de sesión antes de dejar ver el panel, **siempre que `FIREBASE_ENABLED` esté en `true`**. En modo local no aparece ningún login.
+
+### 6. Asegurar las reglas de Firestore
+
+Ve a **Firestore Database → Reglas** y reemplaza el contenido por esto, que solo permite leer/escribir a quien haya iniciado sesión (es decir, solo tú, con la cuenta del paso anterior):
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /movies/{movieId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
   }
 }
 ```
 
-Esto sigue siendo abierto (cualquiera con tu `apiKey` podría leer/escribir), suficiente para un proyecto personal/portafolio. Si más adelante quieres restringirlo solo a ti, la forma correcta es agregar **Firebase Authentication** (inicio de sesión) y cambiar la regla a `allow read, write: if request.auth != null;` — es un paso adicional que no está incluido en esta versión, pero la arquitectura de `storage.js` ya está lista para incorporarlo sin tocar el resto de la app.
+Publica los cambios ("Publicar"). Con esto, aunque alguien más abra el link de tu sitio, no podrá ver ni modificar tus películas sin la contraseña que creaste en el paso 5.
 
-### 6. Probar la sincronización
+> **Nota sobre el `apiKey`:** en apps web de Firebase este valor no es secreto (queda visible en el código del navegador) — es normal y esperado. La seguridad real la dan estas reglas de Firestore combinadas con el login, no ocultar el `apiKey`.
 
-1. Abre el sitio (local o publicado) en tu celular y en tu laptop al mismo tiempo.
+### 7. Probar la sincronización
+
+1. Abre el sitio (local o publicado) en tu celular y en tu laptop al mismo tiempo, e inicia sesión con tu correo y contraseña en ambos.
 2. Agrega una película en un dispositivo.
 3. Debería aparecer automáticamente en el otro en segundos, sin recargar la página — eso es Firestore sincronizando en tiempo real.
+4. Junto a los contadores verás una insignia verde **"Sincronizado en la nube"** y un botón de cerrar sesión — eso confirma que Firebase + login están activos.
 
 ### Volver al modo local
 
-Si en algún momento quieres desactivar Firebase (por ejemplo, para probar algo sin afectar tus datos en la nube), simplemente cambia `FIREBASE_ENABLED` a `false` en `js/firebase-config.js`. La app volverá a usar `localStorage` de inmediato.
+Si en algún momento quieres desactivar Firebase (por ejemplo, para probar algo sin afectar tus datos en la nube), simplemente cambia `FIREBASE_ENABLED` a `false` en `js/firebase-config.js`. La app volverá a usar `localStorage` de inmediato, sin pedir login.
+
+---
+
+## Un dispositivo no ve los cambios / no aparece "Sincronizado en la nube"
+
+Si un dispositivo (por ejemplo tu computadora) muestra **"Almacenamiento local"** en vez de **"Sincronizado en la nube"**, o simplemente no se actualiza, casi siempre es por **caché del navegador** sirviendo una versión vieja de los archivos (muy común justo después de subir cambios a GitHub Pages/Netlify). Revisa en este orden:
+
+1. **Haz un refresco forzado** en ese dispositivo: `Ctrl+Shift+R` (Windows/Linux) o `Cmd+Shift+R` (Mac), o abre el sitio en una ventana de incógnito. Esto ignora la caché y descarga los archivos más recientes.
+2. **Confirma que subiste el mismo `js/firebase-config.js`** (con `FIREBASE_ENABLED = true` y tus credenciales) al mismo repositorio/sitio que abres desde la computadora — es fácil editarlo localmente y olvidar subir ese cambio específico.
+3. **Espera 1-2 minutos** después de publicar: tanto GitHub Pages como el propio navegador tardan un poco en refrescar la versión pública.
+4. **Revisa la consola del navegador** (F12 → pestaña "Console") por errores en rojo relacionados con `firebase` o `gstatic.com` — un bloqueador de anuncios o un firewall de red/antivirus a veces bloquea esos dominios.
+5. Cada vez que subas cambios nuevos, sube también el número de versión (`?v=3` en los `<script>` de `index.html`) — así el navegador sabe que debe descargar la versión nueva en vez de usar la que tenía guardada. Súbelo a `?v=4`, `?v=5`, etc. en cada publicación futura.
 
 ## Arquitectura de almacenamiento
 
-Toda la persistencia está aislada en `js/storage.js`, que expone un único objeto `storageService` con una interfaz fija (`getAll`, `addMovie`, `updateMovie`, `deleteMovie`, `replaceAll`, `exportData`, `importData`, `subscribe`) sin importar el backend. El resto de la app (`crud.js`, `ui.js`, `modal.js`, `app.js`) solo habla con esa interfaz, así que cambiar de backend — o migrar en el futuro a Supabase/Appwrite — no requiere tocar nada más que ese archivo.
+Toda la persistencia está aislada en `js/storage.js`, que expone un único objeto `storageService` con una interfaz fija (`getAll`, `addMovie`, `updateMovie`, `deleteMovie`, `replaceAll`, `exportData`, `importData`, `subscribe`) sin importar el backend. El resto de la app (`crud.js`, `ui.js`, `modal.js`, `app.js`) solo habla con esa interfaz, así que cambiar de backend — o migrar en el futuro a Supabase/Appwrite — no requiere tocar nada más que ese archivo. El control de acceso vive aparte, en `js/auth.js`, y solo se activa cuando `storageService.mode === 'firebase'`.

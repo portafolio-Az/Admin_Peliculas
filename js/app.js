@@ -17,6 +17,7 @@ class App {
   async init() {
     Toast.init();
     try {
+      await authController.requireAuth();
       await movieRepository.init(() => this.render());
       this.bindEvents();
       this.updateSyncStatus();
@@ -32,14 +33,29 @@ class App {
   /** Muestra si la app está sincronizando con Firebase o guardando solo localmente. */
   updateSyncStatus() {
     const el = document.getElementById('syncStatus');
+    const logoutBtn = document.getElementById('logoutBtn');
     if (!el) return;
     const isFirebase = storageService.mode === 'firebase';
     el.textContent = isFirebase ? 'Sincronizado en la nube' : 'Almacenamiento local';
     el.classList.toggle('sync-status--cloud', isFirebase);
     el.classList.toggle('sync-status--local', !isFirebase);
+    if (logoutBtn) logoutBtn.hidden = !(isFirebase && authController.isLoggedIn());
   }
 
   bindEvents() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        const confirmed = await this.modal.confirm({
+          title: 'Cerrar sesión',
+          message: '¿Seguro que quieres cerrar sesión?',
+          confirmLabel: 'Cerrar sesión',
+          danger: false,
+        });
+        if (confirmed) authController.logout();
+      });
+    }
+
     document.getElementById('addMovieBtn').addEventListener('click', () => {
       this.modal.openMovieForm(null, async (data) => {
         await movieRepository.create(data);

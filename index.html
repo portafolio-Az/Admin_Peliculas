@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/style.css?v=3" />
 </head>
 <body>
 
@@ -47,6 +47,9 @@
 
       <div class="header-stats">
         <span class="sync-status" id="syncStatus">Cargando…</span>
+        <button type="button" class="icon-btn" id="logoutBtn" title="Cerrar sesión" aria-label="Cerrar sesión" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </button>
         <div class="stat-pill">
           <span class="stat-pill__value" id="movieCount">0</span>
           <span class="stat-pill__label">Películas</span>
@@ -141,7 +144,12 @@
   funcione al abrir index.html directamente con doble clic (protocolo file://).
   Los navegadores bloquean los módulos ES bajo file://, así que cada archivo
   expone sus funciones/clases en el ámbito global y el orden de carga importa:
-  utils -> (SDK de Firebase + firebase-config) -> storage -> crud -> modal -> ui -> app.
+  utils -> (SDK de Firebase + firebase-config) -> storage -> auth -> crud -> modal -> ui -> app.
+
+  El "?v=3" al final de cada script local es cache-busting: cada vez que
+  publiques cambios (GitHub Pages / Netlify), sube ese número para forzar a
+  los navegadores (el tuyo y los de tus dispositivos) a descargar la versión
+  nueva en vez de servir una copia vieja desde caché. Ver README.
 -->
 <script>
   // Salvaguarda: si algo falla al cargar los scripts, evita que el loader quede
@@ -158,7 +166,7 @@
     }
   }, 4000);
 </script>
-<script src="js/utils.js"></script>
+<script src="js/utils.js?v=3"></script>
 
 <!--
   SDK de Firebase (versión "compat"): se usa esta variante -y no la modular
@@ -168,13 +176,15 @@
 -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js?v=3"></script>
 
-<script src="js/storage.js"></script>
-<script src="js/crud.js"></script>
-<script src="js/modal.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/app.js"></script>
+<script src="js/storage.js?v=3"></script>
+<script src="js/auth.js?v=3"></script>
+<script src="js/crud.js?v=3"></script>
+<script src="js/modal.js?v=3"></script>
+<script src="js/ui.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const emptyBtn = document.getElementById('emptyStateAddBtn');
