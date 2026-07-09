@@ -123,21 +123,27 @@ class ModalController {
       const target = e.target;
       if (target.matches('[data-server-select]')) {
         const idx = Number(target.dataset.serverSelect);
-        const wrapper = serversList.querySelector(`[data-server-custom-wrapper="${idx}"]`);
-        const customInput = serversList.querySelector(`[data-server-custom-name="${idx}"]`);
-
         if (target.value === 'Otro') {
           servers[idx]._pendingCustom = true;
-          servers[idx].name = customInput ? customInput.value : '';
-          if (wrapper) wrapper.hidden = false;
-          this._updateServerIconPreview(idx, servers[idx].name);
+          servers[idx].name = '';
+          renderServers();
+          const customInput = serversList.querySelector(`[data-server-custom-name="${idx}"]`);
           if (customInput) customInput.focus();
         } else {
           servers[idx]._pendingCustom = false;
           servers[idx].name = target.value;
-          if (wrapper) wrapper.hidden = true;
           this._updateServerIconPreview(idx, servers[idx].name);
         }
+      }
+    });
+
+    serversList.addEventListener('click', (e) => {
+      const backBtn = e.target.closest('[data-server-back-to-list]');
+      if (backBtn) {
+        const idx = Number(backBtn.dataset.serverBackToList);
+        servers[idx]._pendingCustom = false;
+        servers[idx].name = '';
+        renderServers();
       }
     });
 
@@ -203,16 +209,19 @@ class ModalController {
 
     const preview = getServerIcon(server.name);
 
+    const selectorControl = isCustom
+      ? `
+        <input type="text" placeholder="Nombre del servidor" data-server-custom-name="${sIdx}" value="${escapeHtml(server.name)}" />
+        <button type="button" class="icon-btn" data-server-back-to-list="${sIdx}" aria-label="Volver a la lista de servidores" title="Volver a la lista">${ICONS.list}</button>
+      `
+      : `<select data-server-select="${sIdx}">${options}</select>`;
+
     return `
       <div class="server-block">
         <div class="server-block__header">
           <span class="server-icon-badge" data-server-icon="${sIdx}" style="color:${preview.color}; background:${preview.color}22;">${preview.icon}</span>
-          <select data-server-select="${sIdx}">${options}</select>
+          ${selectorControl}
           <button type="button" class="icon-btn icon-btn--danger" data-remove-server="${sIdx}" aria-label="Quitar servidor" title="Quitar servidor">${ICONS.trash}</button>
-        </div>
-        <div class="field field--custom-server" data-server-custom-wrapper="${sIdx}" ${isCustom ? '' : 'hidden'}>
-          <label>Nombre del servidor</label>
-          <input type="text" placeholder="Escribe el nombre del servidor" data-server-custom-name="${sIdx}" value="${escapeHtml(isCustom ? server.name : '')}" />
         </div>
         <div class="links-list">${linksHtml}</div>
         <button type="button" class="btn btn--ghost btn--sm" data-add-link="${sIdx}">${ICONS.plus} Agregar enlace</button>
@@ -362,4 +371,5 @@ const ICONS = {
   eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
   edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   duplicate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>',
 };
