@@ -11,13 +11,13 @@
  * -----------------------------------------------------------------------
  */
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDrSmWU_kG-6Ay6MCliacNbvyCPeLhUjLA",
-  authDomain: "admin-peliculas.firebaseapp.com",
-  projectId: "admin-peliculas",
-  storageBucket: "admin-peliculas.firebasestorage.app",
-  messagingSenderId: "381742107664",
-  appId: "1:381742107664:web:b2d6eec54c5ca9e2c7ce95"
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDrSmWU_kG-6Ay6MCliacNbvyCPeLhUjLA',
+  authDomain: 'admin-peliculas.firebaseapp.com',
+  projectId: 'admin-peliculas',
+  storageBucket: 'admin-peliculas.firebasestorage.app',
+  messagingSenderId: '381742107664',
+  appId: '1:381742107664:web:b2d6eec54c5ca9e2c7ce95',
 };
 
 /* Cambia esto a "true" una vez que hayas completado FIREBASE_CONFIG arriba
