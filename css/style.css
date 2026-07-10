@@ -452,6 +452,7 @@ button, input, select { font-family: inherit; }
 }
 
 .server-icon-badge svg { width: 18px; height: 18px; }
+.server-icon-badge img { width: 20px; height: 20px; object-fit: contain; border-radius: 4px; }
 
 .select-with-badge {
   display: flex;
@@ -486,6 +487,7 @@ button, input, select { font-family: inherit; }
 }
 
 .server-icons__badge svg { width: 16px; height: 16px; }
+.server-icons__badge img { width: 18px; height: 18px; object-fit: contain; border-radius: 3px; }
 
 .server-icons__badge:hover { transform: translateY(-2px); }
 
@@ -925,6 +927,35 @@ button, input, select { font-family: inherit; }
 
   .link-row { grid-template-columns: 1fr; row-gap: 6px; }
   .link-row__actions { justify-content: flex-start; }
+
+  /* Modales: más espacio útil y controles que no se recortan en pantallas angostas */
+  .modal-overlay { padding: 4vh 12px; align-items: flex-end; }
+
+  .modal { max-height: 92vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+
+  .modal__header { padding: 16px 18px; }
+  .modal__body { padding: 18px; gap: 16px; }
+  .modal__footer { padding: 14px 18px; }
+
+  .server-block__header {
+    flex-wrap: wrap;
+  }
+
+  .server-block__header select,
+  .server-block__header input {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .modal__footer {
+    flex-direction: column-reverse;
+  }
+
+  .modal__footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {

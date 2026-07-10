@@ -100,8 +100,9 @@ class UIController {
 
     const badges = visible
       .map((server) => {
-        const { label, color, icon } = getServerIcon(server.name);
-        return `<span class="server-icons__badge" style="color:${color}; background:${color}22;" title="${escapeHtml(label)}">${icon}</span>`;
+        const { color, icon, isImage } = getServerIcon(server.name);
+        const bg = isImage ? 'var(--color-surface-3)' : `${color}22`;
+        return `<span class="server-icons__badge" style="color:${color}; background:${bg};" title="${escapeHtml(server.name)}">${icon}</span>`;
       })
       .join('');
 

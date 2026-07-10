@@ -12,12 +12,9 @@ const SERVER_PRESETS = SERVER_CATALOG.map((entry) => entry.label);
 class ModalController {
   constructor() {
     this.overlay = document.getElementById('modalOverlay');
-    this.overlay.addEventListener('click', (e) => {
-      if (e.target === this.overlay) this.close();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.overlay.classList.contains('is-open')) this.close();
-    });
+    // A propósito NO se cierra al hacer clic fuera ni con la tecla Escape:
+    // solo se cierra con los botones explícitos (X, Cancelar, Cerrar, etc.),
+    // para evitar perder datos por accidente mientras se llena un formulario.
   }
 
   close() {
@@ -169,12 +166,7 @@ class ModalController {
 
   /** Actualiza en vivo la insignia de icono junto al nombre del servidor. */
   _updateServerIconPreview(sIdx, name) {
-    const badge = this.overlay.querySelector(`[data-server-icon="${sIdx}"]`);
-    if (!badge) return;
-    const { color, icon } = getServerIcon(name);
-    badge.style.color = color;
-    badge.style.background = `${color}22`;
-    badge.innerHTML = icon;
+    applyServerIconToBadge(this.overlay.querySelector(`[data-server-icon="${sIdx}"]`), name);
   }
 
   _serverBlockHtml(server, sIdx) {
@@ -208,6 +200,7 @@ class ModalController {
       .join('');
 
     const preview = getServerIcon(server.name);
+    const previewBg = preview.isImage ? 'var(--color-surface-3)' : `${preview.color}22`;
 
     const selectorControl = isCustom
       ? `
@@ -219,7 +212,7 @@ class ModalController {
     return `
       <div class="server-block">
         <div class="server-block__header">
-          <span class="server-icon-badge" data-server-icon="${sIdx}" style="color:${preview.color}; background:${preview.color}22;">${preview.icon}</span>
+          <span class="server-icon-badge" data-server-icon="${sIdx}" style="color:${preview.color}; background:${previewBg};">${preview.icon}</span>
           ${selectorControl}
           <button type="button" class="icon-btn icon-btn--danger" data-remove-server="${sIdx}" aria-label="Quitar servidor" title="Quitar servidor">${ICONS.trash}</button>
         </div>
@@ -272,10 +265,7 @@ class ModalController {
 
     const updateBadge = (serverId) => {
       const server = servers.find((s) => s.id === serverId);
-      const { color, icon } = getServerIcon(server ? server.name : '');
-      badge.style.color = color;
-      badge.style.background = `${color}22`;
-      badge.innerHTML = icon;
+      applyServerIconToBadge(badge, server ? server.name : '');
     };
 
     const renderLinks = (serverId) => {

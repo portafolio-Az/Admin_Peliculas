@@ -5,9 +5,10 @@
  */
 
 /**
- * Catálogo de servidores conocidos con su color de marca e icono propio
- * (insignias originales inspiradas en cada marca, no logotipos exactos).
- * Se puede ampliar con más servidores en el futuro sin tocar el resto del código.
+ * Catálogo de servidores conocidos. Cada uno usa el archivo PNG real del
+ * servicio (carpeta assets/icons/) en vez de un dibujo genérico. Si agregas
+ * un servidor nuevo más adelante, solo añade su PNG a esa carpeta y una
+ * entrada aquí con el nombre de archivo exacto (sensible a mayúsculas).
  */
 const SERVER_CATALOG = [
   {
@@ -15,49 +16,49 @@ const SERVER_CATALOG = [
     label: 'Mega',
     match: ['mega'],
     color: '#E63946',
-    icon: '<svg viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="800" fill="currentColor" font-family="Poppins, Inter, sans-serif">M</text></svg>',
+    iconFile: 'mega.png',
   },
   {
     id: 'mediafire',
     label: 'Mediafire',
     match: ['mediafire', 'media fire'],
     color: '#1299D8',
-    icon: '<svg viewBox="0 0 24 24"><text x="12" y="16" text-anchor="middle" font-size="8.5" font-weight="800" fill="currentColor" font-family="Poppins, Inter, sans-serif" letter-spacing="0.5">MF</text></svg>',
+    iconFile: 'mediafire.png',
   },
   {
     id: 'drive',
     label: 'Google Drive',
     match: ['drive', 'google drive', 'googledrive'],
     color: '#34A853',
-    icon: '<svg viewBox="0 0 24 24"><polygon points="9,3 15,3 22,15 16,15" fill="#FBBC05"/><polygon points="9,3 2,15 5,21 12,9" fill="#4285F4"/><polygon points="5,21 19,21 22,15 8,15" fill="#34A853"/></svg>',
+    iconFile: 'drive.png',
   },
   {
     id: 'dropbox',
     label: 'Dropbox',
     match: ['dropbox', 'drop box'],
     color: '#0061FF',
-    icon: '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 12,7 6,11 0,7"/><polygon points="18,3 24,7 18,11 12,7"/><polygon points="6,13 12,17 6,21 0,17"/><polygon points="18,13 24,17 18,21 12,17"/></svg>',
+    iconFile: 'dropbox.png',
   },
   {
     id: 'onedrive',
     label: 'OneDrive',
     match: ['onedrive', 'one drive'],
     color: '#0078D4',
-    icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 17c-2.5 0-4.5-2-4.5-4.5 0-2.2 1.6-4.1 3.7-4.4C8.2 5.9 10.4 4 13 4c2.9 0 5.3 2.1 5.7 4.9 2.2.4 3.8 2.3 3.8 4.6 0 2.5-2 4.5-4.5 4.5H8.5Z"/></svg>',
+    iconFile: 'onedrive.png',
   },
   {
     id: '4shared',
     label: '4shared',
     match: ['4shared', '4 shared'],
     color: '#1CADE4',
-    icon: '<svg viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="800" fill="currentColor" font-family="Poppins, Inter, sans-serif">4</text></svg>',
+    iconFile: '4shared.png',
   },
   {
     id: 'directo',
     label: 'Descarga Directa',
     match: ['descarga directa', 'directo', 'download'],
     color: '#5B8DEF',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+    iconFile: 'Download.png',
   },
   {
     id: 'otro',
@@ -68,20 +69,47 @@ const SERVER_CATALOG = [
   },
 ];
 
+const SERVER_ICON_BASE_PATH = 'assets/icons/';
+
 /**
- * Busca en el catálogo el servidor que coincide con el nombre escrito por el usuario.
- * Si no encuentra coincidencia, devuelve una insignia genérica con la inicial del nombre.
+ * Busca en el catálogo el servidor que coincide con el nombre escrito por el
+ * usuario y devuelve { color, icon, isImage }. Los servidores del catálogo
+ * usan su PNG real (isImage: true); los nombres personalizados que no
+ * coinciden con ninguno usan una insignia con la inicial (isImage: false).
  */
 function getServerIcon(name) {
   const normalized = (name || '').trim().toLowerCase();
   const found = SERVER_CATALOG.find((entry) => entry.match.some((alias) => normalized === alias || normalized.includes(alias)));
-  if (found) return found;
+
+  if (found) {
+    if (found.iconFile) {
+      return {
+        color: found.color,
+        icon: `<img src="${SERVER_ICON_BASE_PATH}${found.iconFile}" alt="${escapeHtml(found.label)}" />`,
+        isImage: true,
+      };
+    }
+    return { color: found.color, icon: found.icon, isImage: false };
+  }
+
   return {
-    id: 'custom',
-    label: name || 'Otro',
     color: '#7C8798',
     icon: `<svg viewBox="0 0 24 24"><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" font-family="Poppins, Inter, sans-serif">${escapeHtml((name || '?').trim().charAt(0).toUpperCase())}</text></svg>`,
+    isImage: false,
   };
+}
+
+/**
+ * Aplica el icono de un servidor a una insignia (elemento con clase
+ * server-icon-badge / server-icons__badge). Centraliza la lógica para que
+ * modal.js y ui.js no dupliquen el mismo cálculo de color/fondo.
+ */
+function applyServerIconToBadge(el, name) {
+  if (!el) return;
+  const { color, icon, isImage } = getServerIcon(name);
+  el.innerHTML = icon;
+  el.style.color = color;
+  el.style.background = isImage ? 'var(--color-surface-3)' : `${color}22`;
 }
 
 /** Genera un identificador único razonablemente corto. */
