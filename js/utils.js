@@ -61,6 +61,13 @@ const SERVER_CATALOG = [
     iconFile: 'Download.png',
   },
   {
+    id: 'pcloud',
+    label: 'PCloud',
+    match: ['pcloud', 'p cloud'],
+    color: '#5B8DEF',
+    iconFile: 'pcloud.png',
+  },
+  {
     id: 'otro',
     label: 'Otro',
     match: ['otro'],
